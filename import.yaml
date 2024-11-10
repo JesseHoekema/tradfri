@@ -1,52 +1,43 @@
 blueprint:
-  name: IKEA Tradfri Dimmer - Dim Licht
-  description: Gebruik de IKEA Tradfri 2-button dimmer om de helderheid van een lamp te dimmen.
+  name: IKEA Tradfri On/Off Switch (E1743)
+  description: Zet een lamp aan of uit met de IKEA Tradfri On/Off Switch (E1743).
   domain: automation
   input:
-    dimmer_button_1:
-      name: "Knop 1"
-      description: "Knop 1 (om op te stijgen)"
+    tradfri_switch:
+      name: "IKEA Tradfri On/Off Switch"
+      description: "De IKEA Tradfri On/Off schakelaar"
       selector:
         entity:
           domain: mqtt
-          device_class: "button"
-    dimmer_button_2:
-      name: "Knop 2"
-      description: "Knop 2 (om af te dalen)"
-      selector:
-        entity:
-          domain: mqtt
-          device_class: "button"
+          device_class: "switch"
     light_entity:
       name: "Lamp"
-      description: "De lamp die je wilt dimmen"
+      description: "De lamp die je wilt aansteken of uitzetten"
       selector:
         entity:
           domain: light
 
 trigger:
   - platform: mqtt
-    topic: !input dimmer_button_1
+    topic: !input tradfri_switch
+    payload: "on"
   - platform: mqtt
-    topic: !input dimmer_button_2
+    topic: !input tradfri_switch
+    payload: "off"
 
 action:
   - choose:
       - conditions:
           - condition: trigger
-            id: dimmer_button_1
+            id: on_trigger
         sequence:
           - service: light.turn_on
             target:
               entity_id: !input light_entity
-            data:
-              brightness: "{{ state_attr('light.' ~ state('input_entity'), 'brightness') | default(0) + 25 }}"
       - conditions:
           - condition: trigger
-            id: dimmer_button_2
+            id: off_trigger
         sequence:
-          - service: light.turn_on
+          - service: light.turn_off
             target:
               entity_id: !input light_entity
-            data:
-              brightness: "{{ state_attr('light.' ~ state('input_entity'), 'brightness') | default(255) - 25 }}"
