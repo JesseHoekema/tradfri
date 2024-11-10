@@ -1,43 +1,20 @@
-blueprint:
-  name: IKEA Tradfri On/Off Switch (E1743)
-  description: Zet een lamp aan of uit met de IKEA Tradfri On/Off Switch (E1743).
-  domain: automation
-  input:
-    tradfri_switch:
-      name: "IKEA Tradfri On/Off Switch"
-      description: "De IKEA Tradfri On/Off schakelaar"
-      selector:
-        entity:
-          domain: mqtt
-          device_class: "switch"
-    light_entity:
-      name: "Lamp"
-      description: "De lamp die je wilt aansteken of uitzetten"
-      selector:
-        entity:
-          domain: light
+automation:
+  - alias: "Turn on light with Tradfri On/Off Switch"
+    trigger:
+      platform: mqtt
+      topic: "zigbee2mqtt/your_switch/state"
+      payload: "on"
+    action:
+      service: light.turn_on
+      target:
+        entity_id: light.your_light_entity
 
-trigger:
-  - platform: mqtt
-    topic: !input tradfri_switch
-    payload: "on"
-  - platform: mqtt
-    topic: !input tradfri_switch
-    payload: "off"
-
-action:
-  - choose:
-      - conditions:
-          - condition: trigger
-            id: on_trigger
-        sequence:
-          - service: light.turn_on
-            target:
-              entity_id: !input light_entity
-      - conditions:
-          - condition: trigger
-            id: off_trigger
-        sequence:
-          - service: light.turn_off
-            target:
-              entity_id: !input light_entity
+  - alias: "Turn off light with Tradfri On/Off Switch"
+    trigger:
+      platform: mqtt
+      topic: "zigbee2mqtt/your_switch/state"
+      payload: "off"
+    action:
+      service: light.turn_off
+      target:
+        entity_id: light.your_light_entity
